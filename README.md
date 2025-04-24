@@ -28,90 +28,6 @@ You’ll integrate **exception handling** into the system, alongside **generics*
 
 ---
 
-## 🚀 Assignment Requirements
-
-### 🔹 Task 1: GitHub Setup (5 points)
-- Create a public repo `EasyStorageTrackerV2-YourName`
-- Add a brief `README.md`
-- Push a minimum of **3 commits**:
-  1. Project scaffold + generic classes
-  2. Exception logic + item classes
-  3. Utility and test/demo code
-
----
-
-### 🔹 Task 2: Enhance the Storage System (30 points)
-
-#### ✅ `StorageUnit<T>` (Generic Class)
-- Can store any type of item `T`
-- Add exception handling:
-  - Throw `EmptyStorageException` (custom) if `getItem()` is called on empty storage
-- Methods:
-  - `void addItem(T item)`
-  - `T getItem() throws EmptyStorageException`
-
-#### ✅ Create `Perishable` abstract class
-- Add:
-  - `LocalDate expirationDate`
-  - `boolean isExpired()`
-
-#### ✅ Create item classes:
-- `Book`, `Device`, `Snack` (with custom fields)
-- Let `Snack` extend `Perishable`
-
-#### ✅ Main class (`TrackerDemo`)
-- Try to store and retrieve items
-- Intentionally test:
-  - Getting from empty storage
-  - Adding an expired perishable
-- Use multiple `try-catch` blocks, including a `finally` message
-
----
-
-### 🔹 Task 3: Utility Class with Exceptions (25 points)
-
-Create a `StorageUtils` class with:
-
-#### 📌 Wildcard Method:
-```java
-public static void printItems(List<? extends Object> items)
-```
-
-#### 📌 Generic Method:
-```java
-public static <T> void displayItem(T item)
-```
-
-#### 📌 Bounded Type Method with Validation:
-```java
-public static <T extends Perishable> void checkPerishable(T item) throws ExpiredItemException
-```
-
-Create `ExpiredItemException` (custom exception) to be thrown when `item.isExpired()` is `true`.
-
----
-
-### 🔹 Task 4: Document and Validate (10 points)
-
-- Add basic `Javadoc` to your classes and methods
-- Include user-friendly exception messages
-- Add a method to validate user input (simulate null or invalid data for unchecked exception demo)
-
----
-
-## 💡 Bonus Tasks (Optional – 10 points)
-
-### 🔸 Extra 1: `StorageManager<T>`
-- Store multiple items in a list
-- Add method to bulk-check perishable expiration and throw collective summary
-
-### 🔸 Extra 2: Add Logging
-- Use `Logger` or `System.out.println()` to track exception events cleanly
-
-### 🔸 Extra 3: Command-line Interface
-- Use `Scanner` to allow the user to add and retrieve items interactively (simulate input validation errors)
-
----
 
 ## 📦 Suggested Project Structure
 
@@ -136,16 +52,268 @@ EasyStorageTrackerV2/
 
 ---
 
-## 🧠 Tips for Success
-
-- Use your exception types wisely: unchecked for bad input, checked for rule enforcement, custom for clarity.
-- Break tasks into small testable parts.
-- Keep code clean and JavaDoc'd — remember, future you (or a teammate) will thank you!
+### 🛠 Step-by-Step Java Project: EasyStorageTracker v2
 
 ---
 
-## 📤 Submission
+## 📦 Step 1: Create Your Generic StorageUnit
 
-- Submit your **GitHub repo link** via your LMS.
-- Make sure the repo is public and builds cleanly.
+This class can store any object, but only one item at a time.
 
+---
+
+### ✅ `StorageUnit.java`
+
+```java
+package storage;
+
+import exception.EmptyStorageException;
+
+public class StorageUnit<T> {
+    private T item; // The stored item
+
+    // Add item to storage
+    public void addItem(T item) {
+        this.item = item;
+        System.out.println("Item stored successfully: " + item);
+    }
+
+    // Retrieve item
+    public T getItem() throws EmptyStorageException {
+        if (item == null) { // 🧠 This is how we know it's empty!
+            throw new EmptyStorageException("Storage is empty! Cannot retrieve item.");
+        }
+        return item;
+    }
+}
+```
+
+---
+
+## 💣 Step 2: Create a Custom Exception – EmptyStorageException
+
+---
+
+### ✅ `EmptyStorageException.java`
+
+```java
+package exception;
+
+public class EmptyStorageException extends Exception {
+    public EmptyStorageException(String message) {
+        super(message);
+    }
+}
+```
+
+🧠 **When is it thrown?** → When someone tries to get an item, but nothing is stored.
+
+---
+
+## 🧊 Step 3: Add Perishable Items
+
+Let’s model something like milk using a simple number as expiration logic.
+
+---
+
+### ✅ `Perishable.java`
+
+```java
+package model;
+
+public abstract class Perishable {
+    private int expirationDay; // Example: day 10
+
+    public Perishable(int expirationDay) {
+        this.expirationDay = expirationDay;
+    }
+
+    public boolean isExpired(int currentDay) {
+        return currentDay > expirationDay;
+    }
+
+    public int getExpirationDay() {
+        return expirationDay;
+    }
+}
+```
+
+🧠 We’re using `int` instead of `LocalDate`, so you can just say today is day 12, and if the item expires on day 10 → it's expired.
+
+---
+
+## 🥛 Step 4: Create Snack (a Perishable)
+
+---
+
+### ✅ `Snack.java`
+
+```java
+package model;
+
+public class Snack extends Perishable {
+    private String name;
+
+    public Snack(String name, int expirationDay) {
+        super(expirationDay);
+        this.name = name;
+    }
+
+    public String toString() {
+        return "Snack: " + name + " (expires on day " + getExpirationDay() + ")";
+    }
+}
+```
+
+---
+
+## 💣 Step 5: Custom Exception for Expired Items
+
+---
+
+### ✅ `ExpiredItemException.java`
+
+```java
+package exception;
+
+public class ExpiredItemException extends Exception {
+    public ExpiredItemException(String message) {
+        super(message);
+    }
+}
+```
+
+🧠 **When is it thrown?** → When someone tries to store or validate an expired perishable item.
+
+---
+
+## 🧰 Step 6: Utility Methods with Exception Handling
+
+---
+
+### ✅ `StorageUtils.java`
+
+```java
+package storage;
+
+import exception.ExpiredItemException;
+import model.Perishable;
+
+import java.util.List;
+
+public class StorageUtils {
+
+    // Wildcard method
+    public static void printItems(List<? extends Object> items) {
+        for (Object item : items) {
+            System.out.println("Stored item: " + item);
+        }
+    }
+
+    // Generic method
+    public static <T> void displayItem(T item) {
+        System.out.println("Displaying item: " + item);
+    }
+
+    // Bounded type method with exception
+    public static <T extends Perishable> void checkPerishable(T item, int currentDay) throws ExpiredItemException {
+        if (item.isExpired(currentDay)) {
+            throw new ExpiredItemException("This item is expired and cannot be stored.");
+        }
+    }
+}
+```
+
+---
+
+## 🎬 Step 7: Main Class to Demonstrate
+
+---
+
+### ✅ `TrackerDemo.java`
+
+```java
+package main;
+
+import exception.EmptyStorageException;
+import exception.ExpiredItemException;
+import model.Snack;
+import storage.StorageUnit;
+import storage.StorageUtils;
+
+public class TrackerDemo {
+
+    public static void main(String[] args) {
+        StorageUnit<Snack> snackStorage = new StorageUnit<>();
+
+        // Set current day of system (for simulation)
+        int today = 12;
+
+        Snack milk = new Snack("Milk", 10); // expired
+        Snack chips = new Snack("Chips", 15); // fresh
+
+        // Track events using System.out
+        System.out.println("[INFO] Trying to store milk...");
+
+        try {
+            StorageUtils.checkPerishable(milk, today); // Throws exception
+            snackStorage.addItem(milk);
+        } catch (ExpiredItemException e) {
+            System.out.println("[ERROR] " + e.getMessage());
+        }
+
+        System.out.println("[INFO] Trying to store chips...");
+
+        try {
+            StorageUtils.checkPerishable(chips, today); // Should pass
+            snackStorage.addItem(chips);
+        } catch (ExpiredItemException e) {
+            System.out.println("[ERROR] " + e.getMessage());
+        }
+
+        // Try to get item from storage
+        try {
+            Snack item = snackStorage.getItem(); // Safe
+            System.out.println("[INFO] Got item: " + item);
+        } catch (EmptyStorageException e) {
+            System.out.println("[ERROR] " + e.getMessage());
+        }
+
+        // Simulate input validation error
+        try {
+            String userInput = null;
+            if (userInput == null || userInput.isEmpty()) {
+                throw new IllegalArgumentException("Invalid input! Item name cannot be null or empty.");
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("[WARNING] " + e.getMessage());
+        } finally {
+            System.out.println("[INFO] Thank you for using EasyStorageTracker!");
+        }
+    }
+}
+```
+
+---
+
+## 📋 Summary of Simulated Exceptions
+
+| Situation                             | Exception Type            | When It Happens                                      |
+|--------------------------------------|---------------------------|------------------------------------------------------|
+| Getting from empty storage           | `EmptyStorageException`   | When no item is stored                              |
+| Storing expired perishable item      | `ExpiredItemException`    | When `isExpired()` returns true                     |
+| Invalid user input (null name)       | `IllegalArgumentException`| Simulated input validation                          |
+
+---
+
+## 🧪 Output Example
+
+```
+[INFO] Trying to store milk...
+[ERROR] This item is expired and cannot be stored.
+[INFO] Trying to store chips...
+Item stored successfully: Snack: Chips (expires on day 15)
+[INFO] Got item: Snack: Chips (expires on day 15)
+[WARNING] Invalid input! Item name cannot be null or empty.
+[INFO] Thank you for using EasyStorageTracker!
+```
