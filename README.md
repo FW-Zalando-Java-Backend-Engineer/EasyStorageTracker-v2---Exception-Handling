@@ -2,7 +2,7 @@
 
 Welcome to **EasyStorageTracker v2**, where we still build a type-safe, flexible storage system — but now with the power of **robust exception handling**.
 
-It’s Java, but more real-world and with better error messages than your average Java script 😏
+It’s Java, but more real-world and with better error messages than your average Java code 😏
 
 ---
 
